@@ -2,10 +2,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavbarComponent from './components/navbar';
-import Footer from './components/footer';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/login';
-import Register from './pages/register';
+import Register from './pages/Register';
 import SubjectPage from './pages/subjectPage';
 import ModulesPage from './pages/Modulepage';
 import EditModulePage from './pages/EditModulePage';
