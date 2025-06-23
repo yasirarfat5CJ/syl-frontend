@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: syllabus-frontend
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npx serve -s dist
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://syl-backend.onrender.com
