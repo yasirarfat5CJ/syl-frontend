@@ -3,7 +3,8 @@ services:
     name: syllabus-frontend
     env: node
     plan: free
-    buildCommand: npm ci && npm run build
+buildCommand: npm ci && npx vite build
+
     startCommand: npx serve -s dist
     staticPublishPath: dist
     envVars:
