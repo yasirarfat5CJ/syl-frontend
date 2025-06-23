@@ -10,7 +10,7 @@ const SubjectsPage = () => {
   const user = JSON.parse(localStorage.getItem('user')); // 👈 Get logged-in user
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/subjects/${branch}/${year}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subjects/${branch}/${year}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch subjects');
         return res.json();
@@ -38,7 +38,7 @@ const SubjectsPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/subject/${subjectId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subject/${subjectId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

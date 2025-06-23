@@ -13,7 +13,7 @@ const ModulesPage = () => {
   const [newTopics, setNewTopics] = useState('');
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/modules/subject/${subjectId}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}`)
       .then((res) => res.json())
       .then((data) => setModules(data));
 
@@ -25,7 +25,7 @@ const ModulesPage = () => {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/syllabus/module/${subjectId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/syllabus/module/${subjectId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
