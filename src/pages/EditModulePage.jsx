@@ -22,7 +22,7 @@ const EditModulePage = () => {
   useEffect(() => {
     const fetchModule = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/modules/subject/${subjectId}`);
         const data = await res.json();
         const moduleToEdit = data.find((m) => m._id === moduleId);
         if (moduleToEdit) {
@@ -44,7 +44,7 @@ const EditModulePage = () => {
 
     try {
       await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}/modules/${moduleId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/modules/subject/${subjectId}/modules/${moduleId}`,
         {
           method: 'PUT',
           headers: {

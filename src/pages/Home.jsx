@@ -11,7 +11,7 @@ const Home = () => {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/branches`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/branches`);
         const data = await response.json();
 
         if (response.ok) {

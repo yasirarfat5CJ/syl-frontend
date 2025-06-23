@@ -13,7 +13,7 @@ const ModulesPage = () => {
   const [newTopics, setNewTopics] = useState('');
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/modules/subject/${subjectId}`)
       .then((res) => res.json())
       .then((data) => setModules(data));
 
