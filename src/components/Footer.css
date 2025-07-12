@@ -1,0 +1,29 @@
+/* Footer.css */
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .footer {
+    padding: 0.5rem 1rem !important;
+    height: 56px; /* Match Navbar height */
+    background-color: #212529 !important;
+  }
+
+  .footer-brand h6 {
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+
+  .footer-icons {
+    display: none !important; /* Hide social icons on mobile */
+  }
+}
+
+/* Chatbot placement fix */
+@media (max-width: 768px) {
+  .chatbot-icon {
+    position: fixed;
+    right: 16px;
+    bottom: 56px; /* Align above footer */
+    z-index: 1050;
+  }
+}

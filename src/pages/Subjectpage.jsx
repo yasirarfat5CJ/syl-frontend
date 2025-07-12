@@ -1,13 +1,12 @@
-// src/pages/SubjectPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Table, Button } from 'react-bootstrap';
 
 const SubjectsPage = () => {
-  const { branch, year,branchId } = useParams();
+  const { branch, year, branchId } = useParams();
   const [subjects, setSubjects] = useState([]);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user')); // 👈 Get logged-in user
+  const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subjects/${branch}/${year}`)
@@ -31,7 +30,6 @@ const SubjectsPage = () => {
     navigate(`/subjects/${subjectId}/modules`);
   };
 
-  // ✅ DELETE SUBJECT HANDLER
   const handleDeleteSubject = async (subjectId) => {
     const confirmDelete = window.confirm('Do you want to delete this subject?');
     if (!confirmDelete) return;
@@ -51,7 +49,6 @@ const SubjectsPage = () => {
         return;
       }
 
-      // ✅ Remove from frontend UI
       setSubjects((prev) => prev.filter((subject) => subject._id !== subjectId));
       alert('Subject deleted successfully.');
     } catch (err) {
@@ -67,68 +64,77 @@ const SubjectsPage = () => {
       <>
         <h5>Semester {semNumber}</h5>
 
-        {/* ✅ Admin-only "Add Subject" button */}
         {user?.role === 'admin' && (
           <Button variant="success" className="mb-2" onClick={() => navigate(`/add-subject/${branchId}/${year}`)}>
             + Add Subject
           </Button>
         )}
 
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Subject Name</th>
-              <th>Subject Code</th>
-              <th>Credits</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredSubjects.length > 0 ? (
-              filteredSubjects.map((subject, index) => (
-                <tr key={subject._id}>
-                  <td>{index + 1}</td>
-                  <td>{subject.name}</td>
-                  <td>{subject.code}</td>
-                  <td>{subject.credits}</td>
-                  <td>
-                    <Button
-                      variant="primary"
-                      onClick={() => handleSubjectClick(subject._id)}
-                    >
-                      View Modules
-                    </Button>
-
-                    {/* ✅ Admin-only Delete button */}
-                    {user?.role === 'admin' && (
-                      <Button
-                        variant="danger"
-                        className="ms-2"
-                        onClick={() => handleDeleteSubject(subject._id)}
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
+        <div className="table-responsive">
+          <Table striped bordered hover style={{ border: '2px solid black' }}>
+            <thead>
               <tr>
-                <td colSpan="5">No subjects found for Semester {semNumber}</td>
+                <th>#</th>
+                <th>Subject Name</th>
+                <th>Subject Code</th>
+                <th>Credits</th>
+                <th>Action</th>
               </tr>
-            )}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {filteredSubjects.length > 0 ? (
+                filteredSubjects.map((subject, index) => (
+                  <tr key={subject._id}>
+                    <td>{index + 1}</td>
+                    <td>{subject.name}</td>
+                    <td>{subject.code}</td>
+                    <td>{subject.credits}</td>
+                    <td>
+                      <Button
+                        variant="primary"
+                        onClick={() => handleSubjectClick(subject._id)}
+                      >
+                        View Modules
+                      </Button>
+                      {user?.role === 'admin' && (
+                        <Button
+                          variant="danger"
+                          className="ms-2"
+                          onClick={() => handleDeleteSubject(subject._id)}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5">No subjects found for Semester {semNumber}</td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
       </>
     );
   };
 
   return (
-    <div className="container mt-4">
-      <h4>{branch.toUpperCase()} - {year} Year</h4>
-      {renderSemester(1)}
-      {renderSemester(2)}
+    <div
+      style={{
+        background: 'linear-gradient(to right, #74ebd5, #acb6e5)',
+        minHeight: '100vh',
+        width: '100%',
+        paddingTop: '30px',
+        paddingBottom: '30px',
+      }}
+    >
+      <div className="container">
+        <h4>{branch.toUpperCase()} - {year} Year</h4>
+        {renderSemester(1)}
+        {renderSemester(2)}
+      </div>
     </div>
   );
 };

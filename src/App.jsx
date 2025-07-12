@@ -31,7 +31,7 @@ function App() {
 
       </Routes>
       <Chatbot/>
-      <Footer />
+      
     </Router>
   );
 }

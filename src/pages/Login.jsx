@@ -1,76 +1,114 @@
 import React, { useState } from 'react';
-import { Form, Button, Card } from 'react-bootstrap';
+import {
+  Form,
+  Button,
+  Alert,
+  Card,
+  InputGroup,
+} from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom'; // ✅ Import Link
+import { FaEnvelope, FaLock } from 'react-icons/fa';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
         email,
         password,
       });
 
-      const { token, user } = response.data;
-
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      alert('Login successful!');
-      navigate('/', { replace: true });
-
-    
-
-     
-    } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      alert(error.response?.data?.msg || 'Login failed');
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      localStorage.setItem('token', res.data.token);
+      window.dispatchEvent(new Event('loginSuccess'));
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+      setError('Invalid email or password');
     }
   };
 
   return (
-    <Card className="mx-auto mt-5 p-4" style={{ maxWidth: '400px' }}>
-      <h3 className="text-center mb-3">Login</h3>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="loginEmail">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </Form.Group>
+    <div
+      style={{
+        position: 'fixed', // 🔒 Lock background
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(to right, #74ebd5, #acb6e5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '45px 12px 12px', // 80px for navbar, 20px bottom
+        overflow: 'hidden',
+        zIndex: 0,
+      }}
+    >
+      <Card
+        className="shadow-lg p-4 w-100"
+        style={{
+          maxWidth: '400px',
+          borderRadius: '15px',
+          background: '#fff',
+          zIndex: 1,
+        }}
+      >
+        <h3 className="mb-4 text-center text-primary fw-bold">Login</h3>
 
-        <Form.Group className="mb-3" controlId="loginPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </Form.Group>
+        {error && <Alert variant="danger">{error}</Alert>}
 
-        <Button variant="primary" type="submit" className="w-100">
-          Login
-        </Button>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group controlId="email" className="mb-3">
+            <Form.Label className="fw-semibold">Email address</Form.Label>
+            <InputGroup>
+              <InputGroup.Text>
+                <FaEnvelope />
+              </InputGroup.Text>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </InputGroup>
+          </Form.Group>
 
-        {/* ✅ Register redirect */}
-        <div className="text-center mt-3">
-          <span>Don't have an account? </span>
-          <Link to="/register">Register here</Link>
-        </div>
-      </Form>
-    </Card>
+          <Form.Group controlId="password" className="mb-4">
+            <Form.Label className="fw-semibold">Password</Form.Label>
+            <InputGroup>
+              <InputGroup.Text>
+                <FaLock />
+              </InputGroup.Text>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+            </InputGroup>
+          </Form.Group>
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-100 fw-semibold"
+          >
+            Log In
+          </Button>
+        </Form>
+      </Card>
+    </div>
   );
 };
 

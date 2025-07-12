@@ -1,28 +1,28 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { FaInstagram, FaWhatsapp, FaFacebook, FaTwitter } from "react-icons/fa";
+import "./Footer.css"; // Link to external styles
 
 const Footer = () => {
   return (
-    <footer className="footer mt-auto bg-light text-dark text-center py-4 ">
+    <footer className="footer mt-auto bg-dark text-white text-center py-3">
       <Container>
         <Row className="align-items-center">
-          <Col md={6} className="text-center text-md-start mb-3 mb-md-0">
-            <h5>Syllabus Manager 📘</h5>
-            <p className="mb-0">Your one-stop solution for college syllabus & resources.</p>
+          <Col xs={12} md={6} className="text-center text-md-start footer-brand">
+            <h6 className="mb-0">Syllabus Manager 📘</h6>
           </Col>
-          <Col md={6} className="text-center text-md-end">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-dark me-3">
-              <FaInstagram size={24} />
+          <Col xs={12} md={6} className="text-center text-md-end mt-2 mt-md-0 footer-icons d-none d-md-block">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white me-3">
+              <FaInstagram size={20} />
             </a>
-            <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" className="text-dark me-3">
-              <FaWhatsapp size={24} />
+            <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" className="text-white me-3">
+              <FaWhatsapp size={20} />
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-dark me-3">
-              <FaFacebook size={24} />
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white me-3">
+              <FaFacebook size={20} />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-dark">
-              <FaTwitter size={24} />
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-white">
+              <FaTwitter size={20} />
             </a>
           </Col>
         </Row>
