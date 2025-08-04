@@ -39,7 +39,6 @@ const Home = () => {
       style={{
         minHeight: '100vh',
         width: '100%',
-        background: 'linear-gradient(to right, #74ebd5, #acb6e5)',
         paddingTop: '4rem',
         paddingBottom: '2rem',
         overflowX: 'hidden',

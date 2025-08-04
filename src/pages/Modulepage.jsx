@@ -74,7 +74,7 @@ const ModulesPage = () => {
   return (
     <div
       style={{
-        background: 'linear-gradient(to right, #74ebd5, #acb6e5)',
+        
         minHeight: '100vh',
         width: '100%',
         paddingTop: '30px',
