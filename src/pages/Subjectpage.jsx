@@ -75,8 +75,8 @@ const SubjectsPage = () => {
             striped
             bordered
             hover
-            className="min-w-100"
-            style={{ border: '2px solid black', minWidth: '600px' }}
+            className="w-100"
+            style={{ border: '2px solid black', tableLayout: 'fixed' }}
           >
             <thead>
               <tr>
@@ -92,8 +92,8 @@ const SubjectsPage = () => {
                 filteredSubjects.map((subject, index) => (
                   <tr key={subject._id}>
                     <td>{index + 1}</td>
-                    <td>{subject.name}</td>
-                    <td>{subject.code}</td>
+                    <td style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{subject.name}</td>
+                    <td style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{subject.code}</td>
                     <td>{subject.credits}</td>
                     <td>
                       <Button

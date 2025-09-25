@@ -82,7 +82,7 @@ const AddSubjectPage = () => {
   };
 
   return (
-    <Container className="mt-4">
+    <Container fluid className="mt-4 px-3">
       <h3 className="mb-4">Add Subject</h3>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">

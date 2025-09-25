@@ -68,7 +68,7 @@ const EditModulePage = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid mt-4 px-3">
       <h4>Update your Module</h4>
       <div className="mb-3">
         <input

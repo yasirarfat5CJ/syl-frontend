@@ -12,6 +12,7 @@ const ModulesPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newTopics, setNewTopics] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}`)
@@ -71,6 +72,15 @@ const ModulesPage = () => {
     }
   };
 
+  const filteredModules = modules.filter((mod) => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    const title = (mod.title || '').toLowerCase();
+    const topics = Array.isArray(mod.topics) ? mod.topics : [];
+    const topicMatch = topics.some((t) => (t || '').toLowerCase().includes(q));
+    return title.includes(q) || topicMatch;
+  });
+
   return (
     <div
       style={{
@@ -83,6 +93,16 @@ const ModulesPage = () => {
     >
       <div className="container-fluid px-0">
         <h4>Modules & Topics</h4>
+
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search modules or topics..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
         {isAdmin && (
           <>
@@ -130,7 +150,7 @@ const ModulesPage = () => {
               </tr>
             </thead>
             <tbody>
-              {modules.map((mod, index) => (
+              {filteredModules.map((mod, index) => (
                 <tr key={mod._id}>
                   <td>{index + 1}</td>
                   <td>{mod.title}</td>
@@ -165,3 +185,4 @@ const ModulesPage = () => {
 };
 
 export default ModulesPage;
+
