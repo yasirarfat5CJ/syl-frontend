@@ -81,7 +81,7 @@ const ModulesPage = () => {
         paddingBottom: '30px',
       }}
     >
-      <div className="container">
+      <div className="container-fluid px-0">
         <h4>Modules & Topics</h4>
 
         {isAdmin && (
@@ -119,8 +119,8 @@ const ModulesPage = () => {
           </>
         )}
 
-        <div className="table-responsive">
-          <Table striped bordered hover style={{ border: '2px solid black' }}>
+        <div className="table-responsive w-100" style={{ overflowX: 'auto' }}>
+          <Table striped bordered hover className="w-100" style={{ border: '2px solid black', tableLayout: 'fixed' }}>
             <thead>
               <tr>
                 <th>#</th>
@@ -134,7 +134,7 @@ const ModulesPage = () => {
                 <tr key={mod._id}>
                   <td>{index + 1}</td>
                   <td>{mod.title}</td>
-                  <td>{mod.topics.join(', ')}</td>
+                  <td style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{mod.topics.join(', ')}</td>
                   {isAdmin && (
                     <td>
                       <Button
