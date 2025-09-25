@@ -18,11 +18,11 @@ const SubjectsPage = () => {
         if (Array.isArray(data)) {
           setSubjects(data);
         } else {
-          console.error("Received data is not an array:", data);
+          console.error('Received data is not an array:', data);
         }
       })
       .catch((error) => {
-        console.error("Error fetching subjects:", error);
+        console.error('Error fetching subjects:', error);
       });
   }, [branch, year]);
 
@@ -36,12 +36,15 @@ const SubjectsPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subject/${subjectId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/subject/${subjectId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!res.ok) {
         const data = await res.json();
@@ -58,33 +61,43 @@ const SubjectsPage = () => {
   };
 
   const renderSemester = (semNumber) => {
-    const filteredSubjects = subjects.filter(subject => subject.semester === semNumber);
+    const filteredSubjects = subjects.filter(
+      (subject) => subject.semester === semNumber
+    );
 
     return (
       <>
         <h5>Semester {semNumber}</h5>
 
         {user?.role === 'admin' && (
-          <Button variant="success" className="mb-2" onClick={() => navigate(`/add-subject/${branch}/${year}`)}>
+          <Button
+            variant="success"
+            className="mb-2"
+            onClick={() => navigate(`/add-subject/${branch}/${year}`)}
+          >
             + Add Subject
           </Button>
         )}
 
-        <div className="table-responsive w-100" style={{ overflowX: 'auto' }}>
+        <div className="table-responsive">
           <Table
             striped
             bordered
             hover
             className="w-100"
-            style={{ border: '2px solid black', tableLayout: 'fixed' }}
+            style={{
+              border: '2px solid black',
+              tableLayout: 'fixed',
+              wordWrap: 'break-word',
+            }}
           >
             <thead>
               <tr>
-                <th>#</th>
-                <th>Subject Name</th>
-                <th>Subject Code</th>
-                <th>Credits</th>
-                <th>Action</th>
+                <th style={{ width: '5%' }}>#</th>
+                <th style={{ width: '30%' }}>Subject Name</th>
+                <th style={{ width: '20%' }}>Subject Code</th>
+                <th style={{ width: '10%' }}>Credits</th>
+                <th style={{ width: '35%' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -92,12 +105,26 @@ const SubjectsPage = () => {
                 filteredSubjects.map((subject, index) => (
                   <tr key={subject._id}>
                     <td>{index + 1}</td>
-                    <td style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{subject.name}</td>
-                    <td style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{subject.code}</td>
+                    <td style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
+                      {subject.name}
+                    </td>
+                    <td style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
+                      {subject.code}
+                    </td>
                     <td>{subject.credits}</td>
-                    <td>
+                    <td
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '5px',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'anywhere',
+                        maxWidth: '100%'
+                      }}
+                    >
                       <Button
                         variant="primary"
+                        size="sm"
                         onClick={() => handleSubjectClick(subject._id)}
                       >
                         View Modules
@@ -105,7 +132,7 @@ const SubjectsPage = () => {
                       {user?.role === 'admin' && (
                         <Button
                           variant="danger"
-                          className="ms-2"
+                          size="sm"
                           onClick={() => handleDeleteSubject(subject._id)}
                         >
                           Delete
@@ -136,7 +163,9 @@ const SubjectsPage = () => {
       }}
     >
       <div className="container-fluid px-2">
-        <h4>{branch.toUpperCase()} - {year} Year</h4>
+        <h4>
+          {branch.toUpperCase()} - {year} Year
+        </h4>
         {renderSemester(1)}
         {renderSemester(2)}
       </div>
