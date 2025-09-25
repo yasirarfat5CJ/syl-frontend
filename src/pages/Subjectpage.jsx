@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Table, Button } from 'react-bootstrap';
 
 const SubjectsPage = () => {
-  const { branch, year, branchId } = useParams();
+  const { branch, year } = useParams();
   const [subjects, setSubjects] = useState([]);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
@@ -65,13 +65,19 @@ const SubjectsPage = () => {
         <h5>Semester {semNumber}</h5>
 
         {user?.role === 'admin' && (
-          <Button variant="success" className="mb-2" onClick={() => navigate(`/add-subject/${branchId}/${year}`)}>
+          <Button variant="success" className="mb-2" onClick={() => navigate(`/add-subject/${branch}/${year}`)}>
             + Add Subject
           </Button>
         )}
 
-        <div className="table-responsive">
-          <Table striped bordered hover style={{ border: '2px solid black' }}>
+        <div className="table-responsive w-100" style={{ overflowX: 'auto' }}>
+          <Table
+            striped
+            bordered
+            hover
+            className="min-w-100"
+            style={{ border: '2px solid black', minWidth: '600px' }}
+          >
             <thead>
               <tr>
                 <th>#</th>
@@ -123,14 +129,13 @@ const SubjectsPage = () => {
   return (
     <div
       style={{
-        
         minHeight: '100vh',
         width: '100%',
         paddingTop: '30px',
         paddingBottom: '30px',
       }}
     >
-      <div className="container">
+      <div className="container-fluid px-2">
         <h4>{branch.toUpperCase()} - {year} Year</h4>
         {renderSemester(1)}
         {renderSemester(2)}

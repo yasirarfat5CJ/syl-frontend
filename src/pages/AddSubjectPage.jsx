@@ -3,14 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Form, Button, Container } from 'react-bootstrap';
 
 const AddSubjectPage = () => {
-  const { branchId, year } = useParams();
+  const { branch, year } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
     code: '',
     credits: '',
-    semester: '',
   });
 
   const [user, setUser] = useState(null); // ✅ Corrected this line
@@ -39,11 +38,23 @@ const AddSubjectPage = () => {
         return;
       }
 
+      // Resolve Branch ObjectId from branch name
+      const branchesRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/branches`);
+      const branches = await branchesRes.json();
+      const matchedBranch = Array.isArray(branches)
+        ? branches.find((b) => (b?.name || '').toLowerCase() === decodeURIComponent(branch).toLowerCase())
+        : null;
+      if (!matchedBranch?._id) {
+        alert('Could not resolve branch.');
+        return;
+      }
+
       const subjectData = {
         ...formData,
         credits: parseInt(formData.credits) || 0,
-        semester: parseInt(formData.semester) || 0,
-        branch: branchId,
+        // No semester field from UI; defaulting to Semester 1
+        semester: 1,
+        branch: matchedBranch._id,
         year: parseInt(year),
       };
 
@@ -60,7 +71,7 @@ const AddSubjectPage = () => {
 
       if (response.ok) {
         alert('Subject added successfully');
-        navigate(`/subjects/${branchId}/${year}`);
+        navigate(`/subjects/${branch}/${year}`);
       } else {
         alert(data.message || 'Failed to add subject');
       }
@@ -107,19 +118,7 @@ const AddSubjectPage = () => {
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Semester</Form.Label>
-          <Form.Select
-            name="semester"
-            value={formData.semester}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Semester</option>
-            <option value="1">Semester 1</option>
-            <option value="2">Semester 2</option>
-          </Form.Select>
-        </Form.Group>
+        {/* Semester selection removed as requested */}
 
         <Button type="submit" variant="success">Add Subject</Button>
       </Form>
