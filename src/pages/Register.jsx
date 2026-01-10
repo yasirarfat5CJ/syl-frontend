@@ -1,147 +1,138 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Table, Button } from 'react-bootstrap';
+import React, { useState } from 'react';
+import {
+  Form,
+  Button,
+  Alert,
+  Card,
+  InputGroup,
+} from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
 
-const SubjectsPage = () => {
-  const { branch, year, branchId } = useParams();
-  const [subjects, setSubjects] = useState([]);
+const Register = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subjects/${branch}/${year}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch subjects');
-        return res.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setSubjects(data);
-        } else {
-          console.error("Received data is not an array:", data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching subjects:", error);
-      });
-  }, [branch, year]);
-
-  const handleSubjectClick = (subjectId) => {
-    navigate(`/subjects/${subjectId}/modules`);
-  };
-
-  const handleDeleteSubject = async (subjectId) => {
-    const confirmDelete = window.confirm('Do you want to delete this subject?');
-    if (!confirmDelete) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subject/${subjectId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, {
+        name,
+        email,
+        password,
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.msg || 'Error deleting subject');
-        return;
-      }
-
-      setSubjects((prev) => prev.filter((subject) => subject._id !== subjectId));
-      alert('Subject deleted successfully.');
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      localStorage.setItem('token', res.data.token);
+      window.dispatchEvent(new Event('loginSuccess'));
+      navigate('/');
     } catch (err) {
-      console.error('Error deleting subject:', err);
-      alert('Something went wrong.');
+      console.error(err);
+      setError(err.response?.data?.msg || 'Registration failed');
     }
-  };
-
-  const renderSemester = (semNumber) => {
-    const filteredSubjects = subjects.filter(subject => subject.semester === semNumber);
-
-    return (
-      <>
-        <h5>Semester {semNumber}</h5>
-
-        {user?.role === 'admin' && (
-          <Button variant="success" className="mb-2" onClick={() => navigate(`/add-subject/${branchId}/${year}`)}>
-            + Add Subject
-          </Button>
-        )}
-
-        <div className="table-responsive w-100">
-          <Table
-            striped
-            bordered
-            hover
-            className="w-100"
-            style={{ border: '2px solid black' }}
-          >
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Subject Name</th>
-                <th>Subject Code</th>
-                <th>Credits</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSubjects.length > 0 ? (
-                filteredSubjects.map((subject, index) => (
-                  <tr key={subject._id}>
-                    <td>{index + 1}</td>
-                    <td>{subject.name}</td>
-                    <td>{subject.code}</td>
-                    <td>{subject.credits}</td>
-                    <td>
-                      <Button
-                        variant="primary"
-                        onClick={() => handleSubjectClick(subject._id)}
-                      >
-                        View Modules
-                      </Button>
-                      {user?.role === 'admin' && (
-                        <Button
-                          variant="danger"
-                          className="ms-2"
-                          onClick={() => handleDeleteSubject(subject._id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5">No subjects found for Semester {semNumber}</td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-        </div>
-      </>
-    );
   };
 
   return (
     <div
       style={{
-        minHeight: '100vh',
-        width: '100%',
-        paddingTop: '30px',
-        paddingBottom: '30px',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(to right, #74ebd5, #acb6e5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '45px 12px 12px',
+        overflow: 'hidden',
+        zIndex: 0,
       }}
     >
-      <div className="container-fluid px-2">
-        <h4>{branch.toUpperCase()} - {year} Year</h4>
-        {renderSemester(1)}
-        {renderSemester(2)}
-      </div>
+      <Card
+        className="shadow-lg p-4 w-100"
+        style={{
+          maxWidth: '400px',
+          borderRadius: '15px',
+          background: '#fff',
+          zIndex: 1,
+        }}
+      >
+        <h3 className="mb-4 text-center text-primary fw-bold">Register</h3>
+
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        <Form onSubmit={handleSubmit}>
+          <Form.Group controlId="name" className="mb-3">
+            <Form.Label className="fw-semibold">Name</Form.Label>
+            <InputGroup>
+              <InputGroup.Text>
+                <FaUser />
+              </InputGroup.Text>
+              <Form.Control
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+                required
+              />
+            </InputGroup>
+          </Form.Group>
+
+          <Form.Group controlId="email" className="mb-3">
+            <Form.Label className="fw-semibold">Email address</Form.Label>
+            <InputGroup>
+              <InputGroup.Text>
+                <FaEnvelope />
+              </InputGroup.Text>
+              <Form.Control
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </InputGroup>
+          </Form.Group>
+
+          <Form.Group controlId="password" className="mb-4">
+            <Form.Label className="fw-semibold">Password</Form.Label>
+            <InputGroup>
+              <InputGroup.Text>
+                <FaLock />
+              </InputGroup.Text>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+            </InputGroup>
+          </Form.Group>
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-100 fw-semibold"
+          >
+            Register
+          </Button>
+          <div className="text-center mt-3">
+            <small>
+              Already have an account? <a href="/login">Login</a>
+            </small>
+          </div>
+        </Form>
+      </Card>
     </div>
   );
 };
 
-export default SubjectsPage;
+export default Register;
