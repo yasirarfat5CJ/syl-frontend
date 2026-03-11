@@ -1,29 +1,27 @@
 import React, { useState } from 'react';
-import {
-  Form,
-  Button,
-  Alert,
-  Card,
-  InputGroup,
-} from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Form, InputGroup } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import AuthCard from '../components/AuthCard';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
         email,
-        password,
+        password
       });
 
       localStorage.setItem('user', JSON.stringify(res.data.user));
@@ -33,82 +31,62 @@ const Login = () => {
     } catch (err) {
       console.error(err);
       setError('Invalid email or password');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed', // 🔒 Lock background
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(to right, #74ebd5, #acb6e5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '45px 12px 12px', // 80px for navbar, 20px bottom
-        overflow: 'hidden',
-        zIndex: 0,
-      }}
+    <AuthCard
+      title="Welcome Back"
+      subtitle="Sign in to continue managing your syllabus."
+      error={error}
+      onSubmit={handleSubmit}
+      submitLabel="Log In"
+      loadingLabel="Logging in..."
+      isSubmitting={isSubmitting}
+      footer={
+        <small>
+          No account yet? <Link to="/register">Create one</Link>
+        </small>
+      }
     >
-      <Card
-        className="shadow-lg p-4 w-100"
-        style={{
-          maxWidth: '400px',
-          borderRadius: '15px',
-          background: '#fff',
-          zIndex: 1,
-        }}
-      >
-        <h3 className="mb-4 text-center text-primary fw-bold">Login</h3>
+      <Form.Group controlId="email" className="mb-3">
+        <Form.Label>Email address</Form.Label>
+        <InputGroup>
+          <InputGroup.Text><FaEnvelope /></InputGroup.Text>
+          <Form.Control
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+          />
+        </InputGroup>
+      </Form.Group>
 
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="email" className="mb-3">
-            <Form.Label className="fw-semibold">Email address</Form.Label>
-            <InputGroup>
-              <InputGroup.Text>
-                <FaEnvelope />
-              </InputGroup.Text>
-              <Form.Control
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </InputGroup>
-          </Form.Group>
-
-          <Form.Group controlId="password" className="mb-4">
-            <Form.Label className="fw-semibold">Password</Form.Label>
-            <InputGroup>
-              <InputGroup.Text>
-                <FaLock />
-              </InputGroup.Text>
-              <Form.Control
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-            </InputGroup>
-          </Form.Group>
-
-          <Button
-            type="submit"
-            variant="primary"
-            className="w-100 fw-semibold"
+      <Form.Group controlId="password" className="mb-4">
+        <Form.Label>Password</Form.Label>
+        <InputGroup>
+          <InputGroup.Text><FaLock /></InputGroup.Text>
+          <Form.Control
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            required
+          />
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label="Toggle password visibility"
           >
-            Log In
-          </Button>
-        </Form>
-      </Card>
-    </div>
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </InputGroup>
+      </Form.Group>
+    </AuthCard>
   );
 };
 

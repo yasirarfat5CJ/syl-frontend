@@ -9,6 +9,7 @@ const LogoutButton = () => {
     // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    window.dispatchEvent(new Event('logoutSuccess'));
 
     // Redirect to login page
     navigate('/login');

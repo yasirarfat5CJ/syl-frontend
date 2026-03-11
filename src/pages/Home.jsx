@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Row, Col, Container, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import PageShell from '../components/PageShell';
+import BranchCard from '../components/BranchCard';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -35,44 +37,29 @@ const Home = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        width: '100%',
-        paddingTop: '4rem',
-        paddingBottom: '2rem',
-        overflowX: 'hidden',
-      }}
+    <PageShell
+      title="Branches"
+      subtitle="Select your branch and academic year to view syllabus."
+      breadcrumbs={[{ label: 'Home' }]}
     >
-      <Container className="px-3">
-        <h2 className="text-center mb-4">Available Branches</h2>
+      {loading ? (
+        <div className="data-card text-center py-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : null}
 
-        {loading && (
-          <div className="text-center">
-            <Spinner animation="border" variant="primary" />
-          </div>
-        )}
-        {error && <Alert variant="danger">{error}</Alert>}
+      {error ? <Alert variant="danger">{error}</Alert> : null}
 
-        <Row xs={1} md={2} lg={3} className="g-4">
-          {branches.map((branch, index) => (
-            <Col key={index}>
-              <Card className="shadow rounded border border-dark">
-                <Card.Body>
-                  <Card.Title className="text-center">{branch.name}</Card.Title>
-                  <div className="d-flex flex-wrap justify-content-center gap-2 mt-3">
-                    <Button variant="primary" onClick={() => handleYearClick(branch.name, 1)}>1st Year</Button>
-                    <Button variant="secondary" onClick={() => handleYearClick(branch.name, 2)}>2nd Year</Button>
-                    <Button variant="success" onClick={() => handleYearClick(branch.name, 3)}>3rd Year</Button>
-                    <Button variant="warning" onClick={() => handleYearClick(branch.name, 4)}>4th Year</Button>
-                  </div>
-                </Card.Body>
-              </Card>
+      {!loading && !error ? (
+        <Row xs={1} md={2} xl={3} className="g-4">
+          {branches.map((branch) => (
+            <Col key={branch._id || branch.name}>
+              <BranchCard name={branch.name} onYearSelect={handleYearClick} />
             </Col>
           ))}
         </Row>
-      </Container>
-    </div>
+      ) : null}
+    </PageShell>
   );
 };
 

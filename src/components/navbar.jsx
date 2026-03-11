@@ -4,12 +4,14 @@ import {
   Container,
   Button
 } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { FaBookOpen, FaMoon, FaSun, FaUserCircle } from 'react-icons/fa';
 
-const Navigation = () => {
+const Navigation = ({ theme = 'light', toggleTheme = () => {} }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showCanvas, setShowCanvas] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const syncLoginState = () => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -19,7 +21,6 @@ const Navigation = () => {
   useEffect(() => {
     syncLoginState();
 
-    // Listen to both localStorage and custom login event
     window.addEventListener('storage', syncLoginState);
     window.addEventListener('loginSuccess', syncLoginState);
     window.addEventListener('logoutSuccess', syncLoginState);
@@ -30,6 +31,10 @@ const Navigation = () => {
       window.removeEventListener('logoutSuccess', syncLoginState);
     };
   }, []);
+
+  useEffect(() => {
+    setShowCanvas(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -45,33 +50,50 @@ const Navigation = () => {
 
   return (
     <>
-      <Navbar bg="dark" variant="dark" expand="lg" fixed="top">
-        <Container>
-          <Navbar.Brand as={Link} to="/">
-            📘 Syllabus Manager
+      {showCanvas && (
+        <div className="mobile-menu-backdrop" onClick={() => setShowCanvas(false)} />
+      )}
+
+      <Navbar expand="lg" fixed="top" className="app-navbar">
+        <Container className="nav-shell">
+          <Navbar.Brand as={Link} to="/" className="brand-wrap">
+            <FaBookOpen className="brand-icon" />
+            <span className="brand-text">Syllabus Manager</span>
           </Navbar.Brand>
 
           <Navbar.Toggle
             aria-controls="offcanvas-nav"
+            className="nav-toggle-btn"
             onClick={() => setShowCanvas(!showCanvas)}
           />
 
           <Navbar.Collapse className="justify-content-end d-none d-lg-flex">
+            <Button variant="outline-light" className="nav-action theme-toggle-btn me-2" onClick={toggleTheme}>
+              {theme === 'dark' ? <FaSun /> : <FaMoon />}
+              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </Button>
+
             {!isLoggedIn ? (
               <>
-                <Link to="/login">
-                  <Button variant="outline-light" className="me-2">
+                <Link to="/login" className="nav-link-btn">
+                  <Button variant="outline-light" className={`me-2 nav-action ${location.pathname === '/login' ? 'active-link' : ''}`}>
                     Login
                   </Button>
                 </Link>
-                <Link to="/register">
-                  <Button variant="outline-light">Register</Button>
+                <Link to="/register" className="nav-link-btn">
+                  <Button variant="outline-light" className={`nav-action ${location.pathname === '/register' ? 'active-link' : ''}`}>Register</Button>
                 </Link>
               </>
             ) : (
-              <Button variant="outline-light" onClick={handleLogout}>
-                Logout
-              </Button>
+              <div className="d-flex align-items-center gap-2">
+                <span className="account-pill">
+                  <FaUserCircle />
+                  Account
+                </span>
+                <Button variant="outline-light" className="nav-action" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </div>
             )}
           </Navbar.Collapse>
         </Container>
@@ -79,21 +101,7 @@ const Navigation = () => {
 
       {/* Floating box for small screen login/register/logout */}
       {showCanvas && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '70px',
-            right: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            padding: '1rem',
-            borderRadius: '10px',
-            zIndex: 1050,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '160px',
-            backdropFilter: 'blur(5px)',
-          }}
-        >
+        <div className="mobile-account-panel">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <strong className="text-white">Account</strong>
             <button
@@ -102,21 +110,27 @@ const Navigation = () => {
               aria-label="Close"
             ></button>
           </div>
+
+          <Button variant="outline-light" className="w-100 mobile-nav-btn mb-2 theme-toggle-btn" onClick={toggleTheme}>
+            {theme === 'dark' ? <FaSun /> : <FaMoon />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </Button>
+
           {!isLoggedIn ? (
             <>
               <Link to="/login" onClick={() => setShowCanvas(false)}>
-                <Button variant="light" className="mb-2 w-100">
+                <Button variant="light" className="mb-2 w-100 mobile-nav-btn">
                   Login
                 </Button>
               </Link>
               <Link to="/register" onClick={() => setShowCanvas(false)}>
-                <Button variant="secondary" className="w-100">
+                <Button variant="secondary" className="w-100 mobile-nav-btn">
                   Register
                 </Button>
               </Link>
             </>
           ) : (
-            <Button variant="danger" className="w-100" onClick={handleLogout}>
+            <Button variant="danger" className="w-100 mobile-nav-btn" onClick={handleLogout}>
               Logout
             </Button>
           )}

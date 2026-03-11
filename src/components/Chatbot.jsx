@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Chatbot.css'; // Create or customize this file for styling
 
 const Chatbot = () => {
@@ -6,6 +6,21 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'));
+
+  useEffect(() => {
+    const syncAuthState = () => setIsAuthenticated(!!localStorage.getItem('token'));
+
+    window.addEventListener('storage', syncAuthState);
+    window.addEventListener('loginSuccess', syncAuthState);
+    window.addEventListener('logoutSuccess', syncAuthState);
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState);
+      window.removeEventListener('loginSuccess', syncAuthState);
+      window.removeEventListener('logoutSuccess', syncAuthState);
+    };
+  }, []);
 
   const toggleChat = () => setShowChat(!showChat);
 
@@ -35,6 +50,10 @@ const Chatbot = () => {
 
     setLoading(false);
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>

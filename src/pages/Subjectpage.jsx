@@ -1,30 +1,59 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Table, Button } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
+import PageShell from '../components/PageShell';
+import SubjectTable from '../components/SubjectTable';
 
 const SubjectsPage = () => {
   const { branch, year } = useParams();
-  const [subjects, setSubjects] = useState([]);
   const navigate = useNavigate();
+  const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subjects/${branch}/${year}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch subjects');
-        return res.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setSubjects(data);
-        } else {
-          console.error('Received data is not an array:', data);
+    const fetchSubjects = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subjects/${branch}/${year}`);
+        const data = await res.json().catch(() => null);
+
+        if (res.status === 404) {
+          // Empty semester/year should render table empty-state, not error.
+          setSubjects([]);
+          setError('');
+          return;
         }
-      })
-      .catch((error) => {
-        console.error('Error fetching subjects:', error);
-      });
+
+        if (!res.ok) {
+          const message = data?.message || data?.msg || 'Failed to fetch subjects';
+          throw new Error(message);
+        }
+
+        setSubjects(Array.isArray(data) ? data : []);
+      } catch (fetchError) {
+        console.error('Error fetching subjects:', fetchError);
+        setError('Unable to load subjects right now.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubjects();
   }, [branch, year]);
+
+  const semesterOne = useMemo(
+    () => subjects.filter((subject) => subject.semester === 1),
+    [subjects]
+  );
+
+  const semesterTwo = useMemo(
+    () => subjects.filter((subject) => subject.semester === 2),
+    [subjects]
+  );
 
   const handleSubjectClick = (subjectId) => {
     navigate(`/subjects/${subjectId}/modules`);
@@ -32,19 +61,18 @@ const SubjectsPage = () => {
 
   const handleDeleteSubject = async (subjectId) => {
     const confirmDelete = window.confirm('Do you want to delete this subject?');
-    if (!confirmDelete) return;
+    if (!confirmDelete) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/subject/${subjectId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/subject/${subjectId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
+      });
 
       if (!res.ok) {
         const data = await res.json();
@@ -54,122 +82,56 @@ const SubjectsPage = () => {
 
       setSubjects((prev) => prev.filter((subject) => subject._id !== subjectId));
       alert('Subject deleted successfully.');
-    } catch (err) {
-      console.error('Error deleting subject:', err);
+    } catch (deleteError) {
+      console.error('Error deleting subject:', deleteError);
       alert('Something went wrong.');
     }
   };
 
-  const renderSemester = (semNumber) => {
-    const filteredSubjects = subjects.filter(
-      (subject) => subject.semester === semNumber
-    );
-
-    return (
-      <>
-        <h5>Semester {semNumber}</h5>
-
-        {user?.role === 'admin' && (
-          <Button
-            variant="success"
-            className="mb-2"
-            onClick={() => navigate(`/add-subject/${branch}/${year}`)}
-          >
-            + Add Subject
-          </Button>
-        )}
-
-        <div className="table-responsive">
-          <Table
-            striped
-            bordered
-            hover
-            className="w-100"
-            style={{
-              border: '2px solid black',
-              tableLayout: 'fixed',
-              wordWrap: 'break-word',
-            }}
-          >
-            <thead>
-              <tr>
-                <th style={{ width: '5%' }}>#</th>
-                <th style={{ width: '30%' }}>Subject Name</th>
-                <th style={{ width: '20%' }}>Subject Code</th>
-                <th style={{ width: '10%' }}>Credits</th>
-                <th style={{ width: '35%' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSubjects.length > 0 ? (
-                filteredSubjects.map((subject, index) => (
-                  <tr key={subject._id}>
-                    <td>{index + 1}</td>
-                    <td style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
-                      {subject.name}
-                    </td>
-                    <td style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>
-                      {subject.code}
-                    </td>
-                    <td>{subject.credits}</td>
-                    <td
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '5px',
-                        wordBreak: 'break-word',
-                        overflowWrap: 'anywhere',
-                        maxWidth: '100%'
-                      }}
-                    >
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleSubjectClick(subject._id)}
-                      >
-                        View Modules
-                      </Button>
-                      {user?.role === 'admin' && (
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDeleteSubject(subject._id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5">No subjects found for Semester {semNumber}</td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-        </div>
-      </>
-    );
-  };
+  const pageActions = (
+    <>
+      <Button variant="outline-secondary" onClick={() => navigate(-1)}>
+        Back
+      </Button>
+    </>
+  );
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        width: '100%',
-        paddingTop: '30px',
-        paddingBottom: '30px',
-      }}
+    <PageShell
+      title={`${decodeURIComponent(branch).toUpperCase()} - Year ${year}`}
+      subtitle="Browse subjects by semester."
+      actions={pageActions}
+      breadcrumbs={[
+        { label: 'Home', to: '/' },
+        { label: decodeURIComponent(branch) },
+        { label: `Year ${year}` }
+      ]}
     >
-      <div className="container-fluid px-2">
-        <h4>
-          {branch.toUpperCase()} - {year} Year
-        </h4>
-        {renderSemester(1)}
-        {renderSemester(2)}
-      </div>
-    </div>
+      {loading ? <div className="data-card">Loading subjects...</div> : null}
+      {error ? <Alert variant="danger">{error}</Alert> : null}
+
+      {!loading && !error ? (
+        <>
+          <SubjectTable
+            title="Semester 1"
+            subjects={semesterOne}
+            isAdmin={user?.role === 'admin'}
+            onAddSubject={() => navigate(`/add-subject/${branch}/${year}`)}
+            onViewModules={handleSubjectClick}
+            onDeleteSubject={handleDeleteSubject}
+          />
+
+          <SubjectTable
+            title="Semester 2"
+            subjects={semesterTwo}
+            isAdmin={user?.role === 'admin'}
+            onAddSubject={() => navigate(`/add-subject/${branch}/${year}`)}
+            onViewModules={handleSubjectClick}
+            onDeleteSubject={handleDeleteSubject}
+          />
+        </>
+      ) : null}
+    </PageShell>
   );
 };
 

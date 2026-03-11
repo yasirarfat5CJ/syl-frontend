@@ -1,26 +1,56 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Table, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button, Form } from 'react-bootstrap';
+import PageShell from '../components/PageShell';
+import ModuleTable from '../components/ModuleTable';
 
 const ModulesPage = () => {
   const navigate = useNavigate();
   const { subjectId } = useParams();
   const [modules, setModules] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
-
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newTopics, setNewTopics] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}`)
-      .then((res) => res.json())
-      .then((data) => setModules(data));
+    const fetchModules = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}`);
+        const data = await res.json().catch(() => null);
+
+        if (res.status === 404) {
+          setModules([]);
+          setError('');
+          return;
+        }
+
+        if (!res.ok) {
+          const message = data?.message || data?.msg || 'Failed to fetch modules';
+          throw new Error(message);
+        }
+
+        setModules(Array.isArray(data) ? data : []);
+      } catch (fetchError) {
+        console.error('Error fetching modules:', fetchError);
+        setError('Unable to load modules right now.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModules();
 
     const user = JSON.parse(localStorage.getItem('user'));
-    if (user?.role === 'admin') setIsAdmin(true);
+    if (user?.role === 'admin') {
+      setIsAdmin(true);
+    }
   }, [subjectId]);
 
   const handleAddModule = async () => {
@@ -31,12 +61,12 @@ const ModulesPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           title: newTitle,
-          topics: newTopics.split(',').map((t) => t.trim()),
-        }),
+          topics: newTopics.split(',').map((topic) => topic.trim())
+        })
       });
 
       const updatedModules = await res.json();
@@ -50,8 +80,10 @@ const ModulesPage = () => {
   };
 
   const handleDeleteModule = async (moduleId) => {
-    const confirmDelete = window.confirm("Do you want to delete this module?");
-    if (!confirmDelete) return;
+    const confirmDelete = window.confirm('Do you want to delete this module?');
+    if (!confirmDelete) {
+      return;
+    }
 
     const token = localStorage.getItem('token');
 
@@ -59,130 +91,91 @@ const ModulesPage = () => {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}/modules/${moduleId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       });
 
       const updatedModules = await res.json();
       setModules(updatedModules);
-
     } catch (err) {
-      console.error("Error deleting module:", err);
-      alert("Failed to delete the module.");
+      console.error('Error deleting module:', err);
+      alert('Failed to delete the module.');
     }
   };
 
-  const filteredModules = modules.filter((mod) => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return true;
-    const title = (mod.title || '').toLowerCase();
-    const topics = Array.isArray(mod.topics) ? mod.topics : [];
-    const topicMatch = topics.some((t) => (t || '').toLowerCase().includes(q));
-    return title.includes(q) || topicMatch;
+  const filteredModules = modules.filter((module) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+
+    const title = (module.title || '').toLowerCase();
+    const topics = Array.isArray(module.topics) ? module.topics : [];
+    return title.includes(query) || topics.some((topic) => (topic || '').toLowerCase().includes(query));
   });
 
   return (
-    <div
-      style={{
-        
-        minHeight: '100vh',
-        width: '100%',
-        paddingTop: '30px',
-        paddingBottom: '30px',
-      }}
+    <PageShell
+      title="Modules & Topics"
+      subtitle="Search, view, and manage module content."
+      actions={<Button variant="outline-secondary" onClick={() => navigate(-1)}>Back</Button>}
+      breadcrumbs={[
+        { label: 'Home', to: '/' },
+        { label: 'Modules' }
+      ]}
     >
-      <div className="container-fluid px-0">
-        <h4>Modules & Topics</h4>
+      <div className="data-card mb-4">
+        <Form.Control
+          type="text"
+          className="mb-3"
+          placeholder="Search modules or topics..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search modules or topics..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
-        {isAdmin && (
+        {isAdmin ? (
           <>
             <Button
-              variant="success"
-              className="mb-2"
-              onClick={() => setShowAddForm(!showAddForm)}
+              className="btn-admin-add mb-3"
+              onClick={() => setShowAddForm((prev) => !prev)}
             >
-              {showAddForm ? 'Cancel' : 'Add Module'}
+              {showAddForm ? 'Cancel' : '+ Add Module'}
             </Button>
 
-            {showAddForm && (
-              <div className="mb-3">
-                <input
+            {showAddForm ? (
+              <div className="module-form-panel">
+                <Form.Control
                   type="text"
                   placeholder="Module Title"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="form-control mb-2"
+                  className="mb-2"
                 />
-                <textarea
+                <Form.Control
+                  as="textarea"
                   rows={5}
-                  type="text"
                   placeholder="Topics (comma-separated)"
                   value={newTopics}
                   onChange={(e) => setNewTopics(e.target.value)}
-                  className="form-control mb-2"
+                  className="mb-2"
                 />
-                <Button variant="primary" onClick={handleAddModule}>
-                  Submit
-                </Button>
+                <Button variant="primary" onClick={handleAddModule}>Submit</Button>
               </div>
-            )}
+            ) : null}
           </>
-        )}
+        ) : null}
 
-        <div className="table-responsive w-100" style={{ overflowX: 'auto' }}>
-          <Table striped bordered hover className="w-100" style={{ border: '2px solid black', tableLayout: 'fixed' }}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Module</th>
-                <th>Topics</th>
-                {isAdmin && <th>Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredModules.map((mod, index) => (
-                <tr key={mod._id}>
-                  <td>{index + 1}</td>
-                  <td>{mod.title}</td>
-                  <td style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{mod.topics.join(', ')}</td>
-                  {isAdmin && (
-                    <td>
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        className="me-2"
-                        onClick={() => navigate(`/edit-module/${subjectId}/${mod._id}`)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDeleteModule(mod._id)}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+        <ModuleTable
+          modules={loading || error ? [] : filteredModules}
+          isAdmin={isAdmin}
+          onEdit={(moduleId) => navigate(`/edit-module/${subjectId}/${moduleId}`)}
+          onDelete={handleDeleteModule}
+        />
+        {loading ? <p className="mt-3 mb-0 text-muted">Loading modules...</p> : null}
+        {error ? <p className="mt-3 mb-0 text-danger">{error}</p> : null}
       </div>
-    </div>
+    </PageShell>
   );
 };
 
 export default ModulesPage;
-
