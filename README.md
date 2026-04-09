@@ -1,12 +1,31 @@
-# React + Vite
+# 📚 Syllabus Management System - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive React-based frontend for managing academic syllabi, courses, modules, and educational content. Built with React 19, Vite, and Bootstrap for a seamless user experience.
 
-Currently, two official plugins are available:
+## 🎯 Project Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The **Syllabus Management System Frontend** is a comprehensive web application designed to help educational institutions manage course syllabi, organize modules, and structure academic content. It provides role-based access control, real-time theme switching, and an intuitive interface for both students and administrators.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Tech Stack
+
+| Category | Technology | Version |
+|----------|-----------|---------|
+| **Framework** | React | ^19.0.0 |
+| **Build Tool** | Vite | ^6.3.5 |
+| **Routing** | React Router DOM | ^7.5.0 |
+| **HTTP Client** | Axios | ^1.8.4 |
+| **UI Framework** | Bootstrap | ^5.3.5 |
+| **React Bootstrap** | React Bootstrap | ^2.10.9 |
+| **Icons** | React Icons | ^5.5.0 |
+| **Linting** | ESLint | ^9.21.0 |
+| **Dev Server** | Serve | ^14.2.4 |
+
+### Development Dependencies
+- `@vitejs/plugin-react` - Fast Refresh support
+- `@eslint/js` - ESLint configuration
+- `eslint-plugin-react` & `eslint-plugin-react-hooks` - React best practices
+- TypeScript type definitions for React
+
+
