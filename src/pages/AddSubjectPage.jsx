@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Form, Button } from 'react-bootstrap';
+import { Alert, Form, Button } from 'react-bootstrap';
 import PageShell from '../components/PageShell';
+import { buildFetchError, getApiErrorMessage, getFieldErrors } from '../utils/apiErrors';
 
 const AddSubjectPage = () => {
   const { branch, year } = useParams();
@@ -10,8 +11,12 @@ const AddSubjectPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     code: '',
-    credits: ''
+    credits: '',
+    semester: '1'
   });
+  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -27,10 +32,14 @@ const AddSubjectPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setFieldErrors({});
+    setIsSubmitting(true);
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Unauthorized: No token found.');
+        setError('Unauthorized: No token found.');
         return;
       }
 
@@ -41,14 +50,15 @@ const AddSubjectPage = () => {
         : null;
 
       if (!matchedBranch?._id) {
-        alert('Could not resolve branch.');
+        setError('Could not resolve branch.');
         return;
       }
 
       const subjectData = {
-        ...formData,
+        name: formData.name,
+        code: formData.code,
         credits: parseInt(formData.credits, 10) || 0,
-        semester: 1,
+        semester: parseInt(formData.semester, 10),
         branch: matchedBranch._id,
         year: parseInt(year, 10)
       };
@@ -68,11 +78,14 @@ const AddSubjectPage = () => {
         alert('Subject added successfully');
         navigate(`/subjects/${branch}/${year}`);
       } else {
-        alert(data.message || 'Failed to add subject');
+        throw buildFetchError(response, data);
       }
     } catch (error) {
       console.log(error);
-      alert('Error adding subject');
+      setFieldErrors(getFieldErrors(error));
+      setError(getApiErrorMessage(error, 'Error adding subject'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -89,6 +102,7 @@ const AddSubjectPage = () => {
       ]}
     >
       <div className="data-card">
+        {error ? <Alert variant="danger">{error}</Alert> : null}
         <Form onSubmit={handleSubmit} className="form-grid">
           <Form.Group className="mb-3">
             <Form.Label>Subject Name</Form.Label>
@@ -97,8 +111,10 @@ const AddSubjectPage = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              isInvalid={!!fieldErrors.name}
               required
             />
+            <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -108,8 +124,25 @@ const AddSubjectPage = () => {
               name="code"
               value={formData.code}
               onChange={handleChange}
+              isInvalid={!!fieldErrors.code}
               required
             />
+            <Form.Control.Feedback type="invalid">{fieldErrors.code}</Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Semester</Form.Label>
+            <Form.Select
+              name="semester"
+              value={formData.semester}
+              onChange={handleChange}
+              isInvalid={!!fieldErrors.semester}
+              required
+            >
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">{fieldErrors.semester}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -119,11 +152,17 @@ const AddSubjectPage = () => {
               name="credits"
               value={formData.credits}
               onChange={handleChange}
+              min="0"
+              max="30"
+              isInvalid={!!fieldErrors.credits}
               required
             />
+            <Form.Control.Feedback type="invalid">{fieldErrors.credits}</Form.Control.Feedback>
           </Form.Group>
 
-          <Button type="submit" className="btn-admin-add">Add Subject</Button>
+          <Button type="submit" className="btn-admin-add" disabled={isSubmitting}>
+            {isSubmitting ? 'Adding...' : 'Add Subject'}
+          </Button>
         </Form>
       </div>
     </PageShell>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Form } from 'react-bootstrap';
+import { Alert, Button, Form } from 'react-bootstrap';
 import PageShell from '../components/PageShell';
 import ModuleTable from '../components/ModuleTable';
+import { buildFetchError, getApiErrorMessage, getFieldErrors } from '../utils/apiErrors';
 
 const ModulesPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ const ModulesPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newTopics, setNewTopics] = useState('');
+  const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -55,6 +59,9 @@ const ModulesPage = () => {
 
   const handleAddModule = async () => {
     const token = localStorage.getItem('token');
+    setFormError('');
+    setFieldErrors({});
+    setIsAdding(true);
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/syllabus/module/${subjectId}`, {
@@ -65,17 +72,26 @@ const ModulesPage = () => {
         },
         body: JSON.stringify({
           title: newTitle,
-          topics: newTopics.split(',').map((topic) => topic.trim())
+          topics: newTopics.split(',').map((topic) => topic.trim()).filter(Boolean)
         })
       });
 
       const updatedModules = await res.json();
+
+      if (!res.ok) {
+        throw buildFetchError(res, updatedModules);
+      }
+
       setModules((prevModules) => [...prevModules, updatedModules.module]);
       setNewTitle('');
       setNewTopics('');
       setShowAddForm(false);
     } catch (err) {
       console.error('Error adding module:', err);
+      setFieldErrors(getFieldErrors(err));
+      setFormError(getApiErrorMessage(err, 'Error adding module'));
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -96,10 +112,15 @@ const ModulesPage = () => {
       });
 
       const updatedModules = await res.json();
+
+      if (!res.ok) {
+        throw buildFetchError(res, updatedModules);
+      }
+
       setModules(updatedModules);
     } catch (err) {
       console.error('Error deleting module:', err);
-      alert('Failed to delete the module.');
+      alert(getApiErrorMessage(err, 'Failed to delete the module.'));
     }
   };
 
@@ -144,22 +165,33 @@ const ModulesPage = () => {
 
             {showAddForm ? (
               <div className="module-form-panel">
+                {formError ? <Alert variant="danger">{formError}</Alert> : null}
                 <Form.Control
                   type="text"
                   placeholder="Module Title"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
+                  isInvalid={!!fieldErrors.title}
                   className="mb-2"
                 />
+                <Form.Control.Feedback type="invalid">
+                  {fieldErrors.title}
+                </Form.Control.Feedback>
                 <Form.Control
                   as="textarea"
                   rows={5}
                   placeholder="Topics (comma-separated)"
                   value={newTopics}
                   onChange={(e) => setNewTopics(e.target.value)}
+                  isInvalid={!!fieldErrors.topics}
                   className="mb-2"
                 />
-                <Button variant="primary" onClick={handleAddModule}>Submit</Button>
+                <Form.Control.Feedback type="invalid">
+                  {fieldErrors.topics}
+                </Form.Control.Feedback>
+                <Button variant="primary" onClick={handleAddModule} disabled={isAdding}>
+                  {isAdding ? 'Submitting...' : 'Submit'}
+                </Button>
               </div>
             ) : null}
           </>

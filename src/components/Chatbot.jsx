@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { FaComments, FaPaperPlane, FaTimes } from 'react-icons/fa';
 import './Chatbot.css'; // Create or customize this file for styling
 
 const Chatbot = () => {
@@ -33,18 +34,22 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({ message: input }),
       });
 
       const data = await res.json();
-      const botMessage = { from: 'bot', text: data.message || 'No reply received.' };  // changed to `data.message`
+      const botMessage = { from: 'bot', text: data.message || 'No reply received.' };
       setMessages(prev => [...prev, botMessage]);
     } catch (err) {
       console.error('Error fetching chatbot response:', err);
-      const errorMsg = { from: 'bot', text: 'Error getting response from Gemini.' };
+      const errorMsg = { from: 'bot', text: 'Error getting chatbot response.' };
       setMessages(prev => [...prev, errorMsg]);
     }
 
@@ -58,14 +63,14 @@ const Chatbot = () => {
   return (
     <>
       <div className="chatbot-toggle" onClick={toggleChat}>
-        💬
+        <FaComments />
       </div>
 
       {showChat && (
         <div className="chatbot-window">
           <div className="chatbot-header">
-            <strong>Ask AI (Gemini)</strong>
-            <button onClick={toggleChat}>✖</button>
+            <strong>Ask AI</strong>
+            <button onClick={toggleChat} aria-label="Close chatbot"><FaTimes /></button>
           </div>
           <div className="chatbot-messages">
             {messages.map((msg, i) => (
@@ -83,7 +88,7 @@ const Chatbot = () => {
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               placeholder="Ask me anything..."
             />
-            <button onClick={sendMessage}>Send</button>
+            <button onClick={sendMessage} aria-label="Send message"><FaPaperPlane /></button>
           </div>
         </div>
       )}

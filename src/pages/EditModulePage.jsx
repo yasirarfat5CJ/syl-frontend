@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Form } from 'react-bootstrap';
+import { Alert, Button, Form } from 'react-bootstrap';
 import PageShell from '../components/PageShell';
+import { buildFetchError, getApiErrorMessage, getFieldErrors } from '../utils/apiErrors';
 
 const EditModulePage = () => {
   const { subjectId, moduleId } = useParams();
@@ -10,6 +11,9 @@ const EditModulePage = () => {
   const [title, setTitle] = useState('');
   const [topics, setTopics] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -43,9 +47,12 @@ const EditModulePage = () => {
 
   const handleUpdate = async () => {
     const token = localStorage.getItem('token');
+    setError('');
+    setFieldErrors({});
+    setIsSubmitting(true);
 
     try {
-      await fetch(
+      const res = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/modules/subject/${subjectId}/modules/${moduleId}`,
         {
           method: 'PUT',
@@ -55,15 +62,25 @@ const EditModulePage = () => {
           },
           body: JSON.stringify({
             title,
-            topics: topics.split(',').map((topic) => topic.trim())
+            topics: topics.split(',').map((topic) => topic.trim()).filter(Boolean)
           })
         }
       );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw buildFetchError(res, data);
+      }
 
       alert('Module updated successfully!');
       navigate(-1);
     } catch (err) {
       console.error('Update failed:', err);
+      setFieldErrors(getFieldErrors(err));
+      setError(getApiErrorMessage(err, 'Update failed'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,6 +96,7 @@ const EditModulePage = () => {
       ]}
     >
       <div className="data-card">
+        {error ? <Alert variant="danger">{error}</Alert> : null}
         {loading ? (
           <p className="mb-0">Loading...</p>
         ) : (
@@ -89,7 +107,9 @@ const EditModulePage = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Module Title"
+              isInvalid={!!fieldErrors.title}
             />
+            <Form.Control.Feedback type="invalid">{fieldErrors.title}</Form.Control.Feedback>
             <Form.Control
               as="textarea"
               rows={5}
@@ -97,9 +117,11 @@ const EditModulePage = () => {
               value={topics}
               onChange={(e) => setTopics(e.target.value)}
               placeholder="Topics (comma-separated)"
+              isInvalid={!!fieldErrors.topics}
             />
-            <Button className="btn-admin-add" onClick={handleUpdate}>
-              Update Module
+            <Form.Control.Feedback type="invalid">{fieldErrors.topics}</Form.Control.Feedback>
+            <Button className="btn-admin-add" onClick={handleUpdate} disabled={isSubmitting}>
+              {isSubmitting ? 'Updating...' : 'Update Module'}
             </Button>
           </Form>
         )}

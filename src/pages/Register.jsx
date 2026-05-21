@@ -4,12 +4,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import AuthCard from '../components/AuthCard';
+import { getApiErrorMessage, getFieldErrors } from '../utils/apiErrors';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
     setIsSubmitting(true);
 
     try {
@@ -32,7 +35,8 @@ const Register = () => {
       navigate('/');
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.msg || 'Registration failed');
+      setFieldErrors(getFieldErrors(err));
+      setError(getApiErrorMessage(err, 'Registration failed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -62,8 +66,12 @@ const Register = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter your name"
+            isInvalid={!!fieldErrors.name}
             required
           />
+          <Form.Control.Feedback type="invalid">
+            {fieldErrors.name}
+          </Form.Control.Feedback>
         </InputGroup>
       </Form.Group>
 
@@ -76,8 +84,12 @@ const Register = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
+            isInvalid={!!fieldErrors.email}
             required
           />
+          <Form.Control.Feedback type="invalid">
+            {fieldErrors.email}
+          </Form.Control.Feedback>
         </InputGroup>
       </Form.Group>
 
@@ -90,6 +102,7 @@ const Register = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
+            isInvalid={!!fieldErrors.password}
             required
           />
           <button
@@ -100,7 +113,13 @@ const Register = () => {
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
+          <Form.Control.Feedback type="invalid">
+            {fieldErrors.password}
+          </Form.Control.Feedback>
         </InputGroup>
+        <Form.Text className="password-help">
+          Use 8+ characters with uppercase, lowercase, number, and symbol.
+        </Form.Text>
       </Form.Group>
     </AuthCard>
   );

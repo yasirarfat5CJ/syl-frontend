@@ -4,11 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import AuthCard from '../components/AuthCard';
+import { getApiErrorMessage, getFieldErrors } from '../utils/apiErrors';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
     setIsSubmitting(true);
 
     try {
@@ -30,7 +33,8 @@ const Login = () => {
       navigate('/');
     } catch (err) {
       console.error(err);
-      setError('Invalid email or password');
+      setFieldErrors(getFieldErrors(err));
+      setError(getApiErrorMessage(err, 'Invalid email or password'));
     } finally {
       setIsSubmitting(false);
     }
@@ -60,8 +64,12 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
+            isInvalid={!!fieldErrors.email}
             required
           />
+          <Form.Control.Feedback type="invalid">
+            {fieldErrors.email}
+          </Form.Control.Feedback>
         </InputGroup>
       </Form.Group>
 
@@ -74,6 +82,7 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
+            isInvalid={!!fieldErrors.password}
             required
           />
           <button
@@ -84,6 +93,9 @@ const Login = () => {
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
+          <Form.Control.Feedback type="invalid">
+            {fieldErrors.password}
+          </Form.Control.Feedback>
         </InputGroup>
       </Form.Group>
     </AuthCard>

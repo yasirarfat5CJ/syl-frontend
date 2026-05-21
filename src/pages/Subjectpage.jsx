@@ -36,7 +36,7 @@ const SubjectsPage = () => {
         setSubjects(Array.isArray(data) ? data : []);
       } catch (fetchError) {
         console.error('Error fetching subjects:', fetchError);
-        setError('Unable to load subjects right now.');
+        setError(fetchError.message || 'Unable to load subjects right now.');
       } finally {
         setLoading(false);
       }
