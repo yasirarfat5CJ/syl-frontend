@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, Table } from 'react-bootstrap';
+import { Badge, Button, Table } from 'react-bootstrap';
+import { FaEye, FaPlus, FaTrash } from 'react-icons/fa';
 
 const SubjectTable = ({
   title,
@@ -15,7 +16,7 @@ const SubjectTable = ({
         <h5 className="section-title mb-0">{title}</h5>
         {isAdmin ? (
           <Button className="btn-admin-add" onClick={onAddSubject}>
-            + Add Subject
+            <FaPlus aria-hidden="true" /> Add Subject
           </Button>
         ) : null}
       </div>
@@ -38,7 +39,9 @@ const SubjectTable = ({
                   <td>{index + 1}</td>
                   <td className="text-break">{subject.name}</td>
                   <td className="text-break">{subject.code}</td>
-                  <td>{subject.credits}</td>
+                  <td>
+                    <Badge className="credit-badge">{subject.credits} credits</Badge>
+                  </td>
                   <td className="subject-action-cell">
                     <Button
                       variant="primary"
@@ -46,7 +49,7 @@ const SubjectTable = ({
                       className="btn-action-view"
                       onClick={() => onViewModules(subject._id)}
                     >
-                      View Modules
+                      <FaEye aria-hidden="true" /> Modules
                     </Button>
                     {isAdmin ? (
                       <Button
@@ -55,7 +58,7 @@ const SubjectTable = ({
                         className="btn-action-delete"
                         onClick={() => onDeleteSubject(subject._id)}
                       >
-                        Delete
+                        <FaTrash aria-hidden="true" /> Delete
                       </Button>
                     ) : null}
                   </td>
@@ -63,8 +66,8 @@ const SubjectTable = ({
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="text-center text-muted py-4">
-                  No subjects found.
+                <td colSpan="5" className="empty-table-cell">
+                  No subjects found for this semester.
                 </td>
               </tr>
             )}

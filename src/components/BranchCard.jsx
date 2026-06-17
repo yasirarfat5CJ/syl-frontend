@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Button } from 'react-bootstrap';
-import { FaLayerGroup } from 'react-icons/fa';
+import { FaArrowRight, FaLayerGroup } from 'react-icons/fa';
 
 const yearOptions = [
   { label: '1st Year', value: 1 },
@@ -10,17 +10,27 @@ const yearOptions = [
 ];
 
 const BranchCard = ({ name, onYearSelect }) => {
+  const initials = name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 3)
+    .toUpperCase();
+
   return (
     <Card className="branch-card h-100">
       <Card.Body className="d-flex flex-column gap-3">
-        <div className="d-flex align-items-center gap-2 justify-content-center">
+        <div className="branch-card-top">
+          <span className="branch-avatar">{initials}</span>
           <FaLayerGroup className="branch-icon" />
-          <Card.Title className="fs-5 mb-0 text-center">{name}</Card.Title>
         </div>
 
-        <p className="branch-description mb-0 text-center">
-          Explore syllabus by academic year.
-        </p>
+        <div>
+          <Card.Title className="fs-5 mb-1">{name}</Card.Title>
+          <p className="branch-description mb-0">
+            Open subjects, credits, and module topics by academic year.
+          </p>
+        </div>
 
         <div className="d-grid gap-2 branch-year-grid mt-auto">
           {yearOptions.map((year) => (
@@ -29,7 +39,8 @@ const BranchCard = ({ name, onYearSelect }) => {
               className="year-btn"
               onClick={() => onYearSelect(name, year.value)}
             >
-              {year.label}
+              <span>{year.label}</span>
+              <FaArrowRight aria-hidden="true" />
             </Button>
           ))}
         </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Container } from 'react-bootstrap';
 import BreadcrumbsNav from './BreadcrumbsNav';
 
-const PageShell = ({ title, subtitle, actions, breadcrumbs = [], children }) => {
+const PageShell = ({ title, subtitle, eyebrow, actions, breadcrumbs = [], children }) => {
   return (
     <div className="page-shell">
       <Container className="page-container">
@@ -10,6 +10,7 @@ const PageShell = ({ title, subtitle, actions, breadcrumbs = [], children }) => 
 
         <div className="page-header mb-3">
           <div>
+            {eyebrow ? <span className="page-eyebrow">{eyebrow}</span> : null}
             <h2 className="page-title mb-1">{title}</h2>
             {subtitle ? <p className="page-subtitle mb-0">{subtitle}</p> : null}
           </div>

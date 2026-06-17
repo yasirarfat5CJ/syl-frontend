@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Alert, Button } from 'react-bootstrap';
+import { Alert, Button, Spinner } from 'react-bootstrap';
+import { FaArrowLeft } from 'react-icons/fa';
 import PageShell from '../components/PageShell';
 import SubjectTable from '../components/SubjectTable';
 
@@ -91,7 +92,7 @@ const SubjectsPage = () => {
   const pageActions = (
     <>
       <Button variant="outline-secondary" onClick={() => navigate(-1)}>
-        Back
+        <FaArrowLeft aria-hidden="true" /> Back
       </Button>
     </>
   );
@@ -99,7 +100,8 @@ const SubjectsPage = () => {
   return (
     <PageShell
       title={`${decodeURIComponent(branch).toUpperCase()} - Year ${year}`}
-      subtitle="Browse subjects by semester."
+      subtitle="Browse subjects by semester, review credits, and open module details."
+      eyebrow="Subject catalog"
       actions={pageActions}
       breadcrumbs={[
         { label: 'Home', to: '/' },
@@ -107,7 +109,12 @@ const SubjectsPage = () => {
         { label: `Year ${year}` }
       ]}
     >
-      {loading ? <div className="data-card">Loading subjects...</div> : null}
+      {loading ? (
+        <div className="data-card empty-state">
+          <Spinner animation="border" variant="primary" />
+          <p className="mb-0 mt-3 text-muted">Loading subjects...</p>
+        </div>
+      ) : null}
       {error ? <Alert variant="danger">{error}</Alert> : null}
 
       {!loading && !error ? (

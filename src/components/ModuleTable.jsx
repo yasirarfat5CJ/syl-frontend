@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Table } from 'react-bootstrap';
+import { FaPen, FaTrash } from 'react-icons/fa';
 
 const ModuleTable = ({ modules, isAdmin, onEdit, onDelete }) => {
   return (
@@ -19,7 +20,13 @@ const ModuleTable = ({ modules, isAdmin, onEdit, onDelete }) => {
               <tr key={module._id}>
                 <td>{index + 1}</td>
                 <td className="text-break">{module.title}</td>
-                <td className="text-break">{Array.isArray(module.topics) ? module.topics.join(', ') : ''}</td>
+                <td className="topic-cell text-break">
+                  {Array.isArray(module.topics) && module.topics.length ? (
+                    module.topics.join(', ')
+                  ) : (
+                    <span className="text-muted">No topics added</span>
+                  )}
+                </td>
                 {isAdmin ? (
                   <td className="module-action-cell">
                     <Button
@@ -28,7 +35,7 @@ const ModuleTable = ({ modules, isAdmin, onEdit, onDelete }) => {
                       className="btn-action-edit"
                       onClick={() => onEdit(module._id)}
                     >
-                      Edit
+                      <FaPen aria-hidden="true" /> Edit
                     </Button>
                     <Button
                       variant="outline-danger"
@@ -36,7 +43,7 @@ const ModuleTable = ({ modules, isAdmin, onEdit, onDelete }) => {
                       className="btn-action-delete"
                       onClick={() => onDelete(module._id)}
                     >
-                      Delete
+                      <FaTrash aria-hidden="true" /> Delete
                     </Button>
                   </td>
                 ) : null}
@@ -44,7 +51,7 @@ const ModuleTable = ({ modules, isAdmin, onEdit, onDelete }) => {
             ))
           ) : (
             <tr>
-              <td colSpan={isAdmin ? 4 : 3} className="text-center text-muted py-4">
+              <td colSpan={isAdmin ? 4 : 3} className="empty-table-cell">
                 No modules found.
               </td>
             </tr>

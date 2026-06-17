@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Alert, Button, Form } from 'react-bootstrap';
+import { Alert, Button, Form, InputGroup, Spinner } from 'react-bootstrap';
+import { FaArrowLeft, FaPlus, FaSearch, FaTimes } from 'react-icons/fa';
 import PageShell from '../components/PageShell';
 import ModuleTable from '../components/ModuleTable';
 import { buildFetchError, getApiErrorMessage, getFieldErrors } from '../utils/apiErrors';
@@ -139,20 +140,26 @@ const ModulesPage = () => {
     <PageShell
       title="Modules & Topics"
       subtitle="Search, view, and manage module content."
-      actions={<Button variant="outline-secondary" onClick={() => navigate(-1)}>Back</Button>}
+      eyebrow="Module planner"
+      actions={<Button variant="outline-secondary" onClick={() => navigate(-1)}><FaArrowLeft aria-hidden="true" /> Back</Button>}
       breadcrumbs={[
         { label: 'Home', to: '/' },
         { label: 'Modules' }
       ]}
     >
       <div className="data-card mb-4">
-        <Form.Control
-          type="text"
-          className="mb-3"
-          placeholder="Search modules or topics..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="module-toolbar">
+          <InputGroup className="module-search">
+            <InputGroup.Text><FaSearch /></InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search modules or topics..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </InputGroup>
+          <span className="result-count">{filteredModules.length} shown</span>
+        </div>
 
         {isAdmin ? (
           <>
@@ -160,7 +167,8 @@ const ModulesPage = () => {
               className="btn-admin-add mb-3"
               onClick={() => setShowAddForm((prev) => !prev)}
             >
-              {showAddForm ? 'Cancel' : '+ Add Module'}
+              {showAddForm ? <FaTimes aria-hidden="true" /> : <FaPlus aria-hidden="true" />}
+              {showAddForm ? 'Cancel' : 'Add Module'}
             </Button>
 
             {showAddForm ? (
@@ -203,7 +211,12 @@ const ModulesPage = () => {
           onEdit={(moduleId) => navigate(`/edit-module/${subjectId}/${moduleId}`)}
           onDelete={handleDeleteModule}
         />
-        {loading ? <p className="mt-3 mb-0 text-muted">Loading modules...</p> : null}
+        {loading ? (
+          <div className="empty-state py-4">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-3 mb-0 text-muted">Loading modules...</p>
+          </div>
+        ) : null}
         {error ? <p className="mt-3 mb-0 text-danger">{error}</p> : null}
       </div>
     </PageShell>

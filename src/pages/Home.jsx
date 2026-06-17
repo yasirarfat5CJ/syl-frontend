@@ -38,20 +38,37 @@ const Home = () => {
 
   return (
     <PageShell
-      title="Branches"
-      subtitle="Select your branch and academic year to view syllabus."
+      eyebrow="Academic dashboard"
+      title="Find the right syllabus faster"
+      subtitle="Choose a branch, pick the year, and move straight into subjects and modules without digging through files."
       breadcrumbs={[{ label: 'Home' }]}
     >
+      <div className="dashboard-summary mb-4">
+        <div>
+          <span className="summary-label">Branches</span>
+          <strong>{loading ? '...' : branches.length}</strong>
+        </div>
+        <div>
+          <span className="summary-label">Years per branch</span>
+          <strong>4</strong>
+        </div>
+        <div>
+          <span className="summary-label">Access</span>
+          <strong>Role based</strong>
+        </div>
+      </div>
+
       {loading ? (
-        <div className="data-card text-center py-5">
+        <div className="data-card empty-state text-center py-5">
           <Spinner animation="border" variant="primary" />
+          <p className="mb-0 mt-3 text-muted">Loading available branches...</p>
         </div>
       ) : null}
 
       {error ? <Alert variant="danger">{error}</Alert> : null}
 
       {!loading && !error ? (
-        <Row xs={1} md={2} xl={3} className="g-4">
+        <Row xs={1} md={2} xl={3} className="g-3">
           {branches.map((branch) => (
             <Col key={branch._id || branch.name}>
               <BranchCard name={branch.name} onYearSelect={handleYearClick} />
